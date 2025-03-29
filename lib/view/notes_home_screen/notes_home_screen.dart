@@ -1,17 +1,24 @@
 import 'package:flutter/material.dart';
+import 'package:note_app_medium/controller/notes_screen_controller.dart';
+import 'package:note_app_medium/view/add_tasks_screen/add_tasks_screen.dart';
 
 void main() {}
 
-class NotesHomeScreen extends StatelessWidget {
+class NotesHomeScreen extends StatefulWidget {
   const NotesHomeScreen({super.key});
 
+  @override
+  State<NotesHomeScreen> createState() => _NotesHomeScreenState();
+}
+
+class _NotesHomeScreenState extends State<NotesHomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.blueGrey,
         title: Text(
-          "Notes",
+          "Daily Manager",
           style: TextStyle(color: Colors.white),
         ),
         actions: [
@@ -33,30 +40,40 @@ class NotesHomeScreen extends StatelessWidget {
             SizedBox(
               height: 10,
             ),
-            Container(
-              width: double.infinity,
-              decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(10),
-                  gradient: LinearGradient(
-                      colors: [Colors.grey.shade400, Colors.blueGrey],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight)),
-              margin: EdgeInsets.all(10),
-              height: 100,
-              child: Column(
-                spacing: 5,
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.add,
-                    size: 50,
-                  ),
-                  Text(
-                    "Add Note",
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                ],
+
+            ///
+            ///      Generate new Task
+            ///
+            InkWell(
+              onTap: () {
+                Navigator.push(context,
+                    MaterialPageRoute(builder: (context) => AddTasksScreen()));
+              },
+              child: Container(
+                width: double.infinity,
+                decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10),
+                    gradient: LinearGradient(
+                        colors: [Colors.grey.shade400, Colors.blueGrey],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight)),
+                margin: EdgeInsets.all(10),
+                height: 100,
+                child: Column(
+                  spacing: 5,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.add,
+                      size: 50,
+                    ),
+                    Text(
+                      "Add  Note / Task",
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                  ],
+                ),
               ),
             ),
             Container(
@@ -71,6 +88,10 @@ class NotesHomeScreen extends StatelessWidget {
                     fontSize: 20),
               ),
             ),
+
+            ///
+            /// category selection
+            ///
             Container(
               decoration: BoxDecoration(
                   border: Border.all(
@@ -85,6 +106,7 @@ class NotesHomeScreen extends StatelessWidget {
                     dropdownColor: Colors.grey.shade300,
                     //focusColor: Colors.greenAccent,
                     isExpanded: true,
+                    value: NotesScreenController.selectedCategory,
                     menuWidth: MediaQuery.sizeOf(context).width * .85,
                     hint: Text(
                       "All",
@@ -93,12 +115,21 @@ class NotesHomeScreen extends StatelessWidget {
                           ),
                     ),
                     items: List.generate(
-                        5,
-                        (index) =>
-                            DropdownMenuItem(value: 0, child: Text("All"))),
-                    onChanged: (value) {}),
+                        NotesScreenController.categories.length,
+                        (index) => DropdownMenuItem(
+                            value: NotesScreenController.categories[index],
+                            child:
+                                Text(NotesScreenController.categories[index]))),
+                    onChanged: (value) {
+                      NotesScreenController.onCategorySelection(value);
+                      setState(() {});
+                    }),
               ),
             ),
+
+            ///
+            ///    List of Notes
+            ///
             Expanded(
               child: Container(
                 child: ListView.builder(
