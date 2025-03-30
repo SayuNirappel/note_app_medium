@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:note_app_medium/controller/notes_screen_controller.dart';
+import 'package:note_app_medium/data_base/data_base.dart';
 
 void main() {}
 
 class AddTasksScreen extends StatefulWidget {
-  const AddTasksScreen({super.key});
+  final AppDatabase database;
+  const AddTasksScreen({super.key, required this.database});
 
   @override
   State<AddTasksScreen> createState() => _AddTasksScreenState();
@@ -15,6 +17,14 @@ class _AddTasksScreenState extends State<AddTasksScreen> {
   TextEditingController detailsController = TextEditingController();
   TextEditingController dateController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
+
+  late NotesScreenController controller;
+
+  @override
+  void initState() {
+    super.initState();
+    controller = NotesScreenController(widget.database);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -63,6 +73,12 @@ class _AddTasksScreenState extends State<AddTasksScreen> {
                       errorBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.horizontal(),
                           borderSide: BorderSide(color: Colors.redAccent))),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return "Title is required";
+                    }
+                    return null;
+                  },
                 ),
 
                 ///
@@ -110,7 +126,7 @@ class _AddTasksScreenState extends State<AddTasksScreen> {
                         value: NotesScreenController.selectedCategory,
                         menuWidth: MediaQuery.sizeOf(context).width,
                         hint: Text(
-                          "All",
+                          "Select Category",
                           style: TextStyle(
                               fontWeight: FontWeight.bold,
                               color: Colors.blueGrey.shade900),
@@ -192,6 +208,12 @@ class _AddTasksScreenState extends State<AddTasksScreen> {
                       errorBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.horizontal(),
                           borderSide: BorderSide(color: Colors.redAccent))),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return "Date is required";
+                    }
+                    return null;
+                  },
                 ),
 
                 ///
@@ -201,8 +223,22 @@ class _AddTasksScreenState extends State<AddTasksScreen> {
                   height: 10,
                 ),
                 InkWell(
-                  onTap: () {
-                    Navigator.pop(context);
+                  onTap: () async {
+                    if (_formKey.currentState!.validate()) {
+                      await controller.insertNote(
+                        titleController.text.trim(),
+                        detailsController.text.trim(),
+                        NotesScreenController.selectedCategory ?? "All",
+                        NotesScreenController.selectedPriority ?? "Level 0",
+                        DateTime.now(),
+                      );
+
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text("Note Added Successfully")),
+                      );
+
+                      Navigator.pop(context);
+                    }
                   },
                   child: Container(
                     decoration: BoxDecoration(

@@ -1,7 +1,11 @@
+import 'package:drift/drift.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:note_app_medium/data_base/data_base.dart';
 
 class NotesScreenController {
+  final AppDatabase database;
+  NotesScreenController(this.database);
   static String? selectedCategory;
   static String? selectedPriority;
   static const List<String> categories = [
@@ -19,11 +23,11 @@ class NotesScreenController {
     "Events & Appointments"
   ];
   static const List<String> priorities = [
-    "Level 0 - Low",
+    "Level 0",
     "Level 1",
-    "Level 2 - Normal",
+    "Level 2",
     "Level 3",
-    "Level 4 - High"
+    "Level 4"
   ];
 
   static void onCategorySelection(String? value) {
@@ -52,5 +56,18 @@ class NotesScreenController {
       return formatedDate;
     }
     return "";
+  }
+
+  //---------Inserting notes into database-----------------
+
+  Future<void> insertNote(String title, String? details, String category,
+      String priority, DateTime date) async {
+    final note = NotesCompanion(
+        title: Value(title),
+        details: Value(details),
+        category: Value(category),
+        priority: Value(priority),
+        date: Value(date));
+    await database.into(database.notes).insert(note);
   }
 }
